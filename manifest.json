@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "ChatGPT Voice Assistant",
+    "description": "A voice assistant for ChatGPT.",
+    "version": "1.0",
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content-script.js"]
+        }
+    ],
+    "permissions": ["tabs"],
+    "background": {
+        "service_worker": "background.js"
+    }
+}
