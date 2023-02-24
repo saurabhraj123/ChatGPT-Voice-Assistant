@@ -1,8 +1,17 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if(request.action === 'makeSearch') {
-        console.log(request);
-        document.querySelector('textarea').value = request.input;
+  if (request.action === 'makeSearch') {
+    console.log(request);
+    document.querySelector('textarea').value = request.input;
+
+    const xpathResult = document.evaluate('//*[@id="__next"]/div[1]/div[1]/main/div[2]/form/div/div[2]/button', document, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null);
+
+    // loop through the result set and print the text content of each element
+    let node = xpathResult.iterateNext();
+    while (node) {
+      console.log(node.click());
+      node = xpathResult.iterateNext();
     }
+  }
 })
 
 // const target = document.querySelector('div');
@@ -32,21 +41,39 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 // select the parent div you want to observe
 const target = document.querySelector('main > div.flex-1.overflow-hidden > div > div > div');
 
+let text = "";
+let old = "";
+
 // create a new MutationObserver instance
 const observer = new MutationObserver((mutations) => {
   mutations.forEach((mutation) => {
+    // console.log(mutation);
     if (mutation.type === "childList") {
-        for (const addedNode of mutation.addedNodes) {
-            // Do something with the added node
-            // console.log('Added node:', addedNode);
-            console.log(addedNode.textContent);
-          }
-      // do something when a child element is added to the parent div
-    //   console.log("Child element added:", mutation.addedNodes[0]);
-    // console.log(mutation.target.textContent);
-    }else if (mutation.type === 'characterData') {
-        // Do something with the text content that was changed
-        console.log('Changed text content:', mutation.target.textContent);
+      console.log('---------------------------');
+      for (const addedNode of mutation.addedNodes)
+        console.log(addedNode.textContent);
+
+      text = '';
+
+    } else if (mutation.type === 'characterData') {
+      let output = mutation.target.textContent;
+      output = output.trimEnd();
+
+      const lastChar = output.slice(-1);
+      console.log('LastChar', lastChar);
+      if (lastChar === '.' || lastChar === '?' || lastChar === '!' || lastChar === ':') {
+        // let oldPara = text.slice(' ');
+        let newPara = output.slice(text.length);
+
+        let speech = new SpeechSynthesisUtterance(newPara);
+        // speech.rate = 5;
+        speechSynthesis.speak(speech);
+        console.log('here', text);
+        // old = speech;
+        text = output;
+      }
+
+      console.log('Changed text content:', mutation.target.textContent);
     }
   });
 });
